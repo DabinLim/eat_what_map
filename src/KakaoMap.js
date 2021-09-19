@@ -4,9 +4,9 @@ import {useEffect} from "react";
 
 const KaKaoMap = () => {
 
+    const { kakao } = window
 
     useEffect(() => {
-    const { kakao } = window
         let container = document.getElementById('map');
         let options = {
             center: new kakao.maps.LatLng(37.365264512305174, 127.10676860117488),
