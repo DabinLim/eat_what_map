@@ -2,9 +2,17 @@ import * as React from 'react';
 import styled from "styled-components";
 import {useEffect} from "react";
 
-const KaKaoMap = () => {
+const listener = (event) => {
+    console.log(event.data);
+    const { data, type } = JSON.parse(event.data);
+    if ( type === "Location" ) {
+        console.log(data)
+    }
+};
 
-    const { kakao } = window
+const { kakao } = window
+
+const KaKaoMap = () => {
 
     useEffect(() => {
         let container = document.getElementById('map');
@@ -13,6 +21,19 @@ const KaKaoMap = () => {
             level: 3,
         }
         let map = new kakao.maps.Map(container, options)
+    },[])
+
+    useEffect(() => {
+        if (window.ReactNativeWebView){
+            // android
+            document.addEventListener("message", listener);
+            // ios
+            window.addEventListener("message", listener);
+        }
+        return () => {
+            document.removeEventListener("message", listener);
+            window.removeEventListener("message", listener);
+        }
     },[])
 
     useEffect(() => {
