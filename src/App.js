@@ -1,10 +1,13 @@
 import React from 'react';
-import KaKaoMap from "./KakaoMap";
+import KaKaoMap from "./components/KakaoMap";
+import RNListener from "./components/RNListener";
 
 function App() {
   return (
     <React.Fragment>
-      <KaKaoMap />
+        <RNListener>
+          <KaKaoMap />
+        </RNListener>
     </React.Fragment>
   );
 }

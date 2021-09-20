@@ -15,6 +15,18 @@ const KaKaoMap = () => {
         let map = new kakao.maps.Map(container, options)
     },[])
 
+    useEffect(() => {
+        requestPermission();
+    },[])
+
+    const requestPermission = () => {
+        if(window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(
+                JSON.stringify({message: 'this is message from webview'})
+            )
+        }
+    }
+
     return(
         <Container id="map">
 
