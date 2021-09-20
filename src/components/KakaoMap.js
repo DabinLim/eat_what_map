@@ -1,40 +1,22 @@
 import * as React from 'react';
 import styled from "styled-components";
 import {useEffect} from "react";
-
-const listener = (event) => {
-    console.log(event.data);
-    const { data, type } = JSON.parse(event.data);
-    if ( type === "Location" ) {
-        console.log(data)
-    }
-};
+import {useRecoilState} from "recoil";
+import {mapAtoms} from "../recoil/atoms/mapAtoms";
 
 const { kakao } = window
 
 const KaKaoMap = () => {
+    const [location, setLocation] = useRecoilState(mapAtoms.locationState);
 
     useEffect(() => {
         let container = document.getElementById('map');
         let options = {
-            center: new kakao.maps.LatLng(37.365264512305174, 127.10676860117488),
+            center: new kakao.maps.LatLng(location.latitude, location.longitude),
             level: 3,
         }
         let map = new kakao.maps.Map(container, options)
-    },[])
-
-    useEffect(() => {
-        if (window.ReactNativeWebView){
-            // android
-            document.addEventListener("message", listener);
-            // ios
-            window.addEventListener("message", listener);
-        }
-        return () => {
-            document.removeEventListener("message", listener);
-            window.removeEventListener("message", listener);
-        }
-    },[])
+    },[location])
 
     useEffect(() => {
         requestPermission();
