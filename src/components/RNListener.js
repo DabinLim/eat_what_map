@@ -5,7 +5,7 @@ import {mapAtoms} from "../recoil/atoms/mapAtoms";
 const RNListener = ({children}) => {
 
     const [location, setLocation] = useRecoilState(mapAtoms.locationState);
-
+    const [keyword, setKeyword] = useRecoilState(mapAtoms.keywordState);
     useEffect(() => {
         if (window.ReactNativeWebView){
             // android
@@ -23,7 +23,10 @@ const RNListener = ({children}) => {
         console.log(JSON.parse(event.data));
         const { data, type } = JSON.parse(event.data);
         if ( type === "Location" ) {
-            setLocation(()=>data);
+            setLocation(() => data);
+        }
+        if( type === "Keyword") {
+            setKeyword(() => `${data} 맛집`)
         }
     };
 
