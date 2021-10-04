@@ -34,16 +34,11 @@ const KaKaoMap = () => {
         if (ps) {
             searchPlaces();
         }
-    }, [ps])
+    }, [ps, keywordFromRN])
 
     const searchPlaces = () => {
 
-        let keyword = document.getElementById('keyword').value;
-
-        if (!keyword.replace(/^\s+|\s+$/g, '')) {
-            alert('키워드를 입력해주세요!');
-            return false;
-        }
+        let keyword = keywordFromRN;
 
         // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
         ps.keywordSearch(keyword, placesSearchCB);
@@ -238,18 +233,6 @@ const KaKaoMap = () => {
         }
     }
 
-    useEffect(() => {
-
-    }, [keywordFromRN, keywordFromRN])
-
-    const requestPermission = () => {
-        if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(
-                JSON.stringify({message: 'this is message from webview'})
-            )
-        }
-    }
-
     return (
         <Container id="map">
             <div className="map_wrap">
@@ -259,7 +242,7 @@ const KaKaoMap = () => {
                     <div className="option">
                         <div>
                             <form onSubmit="searchPlaces(); return false;">
-                                키워드 : <input type="text" value="연남동 맛집" id="keyword" size="15"/>
+                                키워드 : <input type="text" value={keywordFromRN} id="keyword" size="15"/>
                                 <button type="submit">검색하기</button>
                             </form>
                         </div>
