@@ -54,12 +54,14 @@ const KaKaoMap = () => {
 
             // 정상적으로 검색이 완료됐으면
             // 검색 목록과 마커를 표출합니다
-            window.ReactNativeWebView.postMessage(
-                JSON.stringify({
-                    type: 'placeData',
-                    message: data
-                })
-            )
+            if(window.ReactNativeWebView){
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({
+                        type: 'placeData',
+                        message: data
+                    })
+                )
+            }
             displayPlaces(data);
 
             // 페이지 번호를 표출합니다
