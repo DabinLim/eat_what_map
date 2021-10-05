@@ -22,7 +22,7 @@ const KaKaoMap = () => {
         if (kakao) {
             let options = {
                 center: new kakao.maps.LatLng(location.latitude, location.longitude),
-                level: 3,
+                level: 8,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
             setPs(new kakao.maps.services.Places());
@@ -37,8 +37,7 @@ const KaKaoMap = () => {
     }, [ps, keywordFromRN])
 
     const searchPlaces = () => {
-        console.log(keywordFromRN);
-        let keyword = keywordFromRN;
+        let keyword = JSON.stringify(keywordFromRN);
 
         // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
         ps.keywordSearch(keyword, placesSearchCB);
