@@ -7,7 +7,7 @@ const RNListener = ({children}) => {
     const [location, setLocation] = useRecoilState(mapAtoms.locationState);
     const [keyword, setKeyword] = useRecoilState(mapAtoms.keywordState);
     useEffect(() => {
-        if (window.ReactNativeWebView){
+        if (window.ReactNativeWebView) {
             // android
             document.addEventListener("message", listener);
             // ios
@@ -17,25 +17,25 @@ const RNListener = ({children}) => {
             document.removeEventListener("message", listener);
             window.removeEventListener("message", listener);
         }
-    },[])
+    }, [])
 
     const listener = (event) => {
         console.log(JSON.parse(event.data));
-        const { data, type } = JSON.parse(event.data);
-        if ( type === "Location" ) {
-            setLocation(() => data);
+        const {data, type} = JSON.parse(event.data);
+        if (type === "Location") {
+            setLocation(data);
         }
-        if( type === "Keyword") {
+        if (type === "Keyword") {
             console.log(data.keyword);
-            setKeyword(() => `${data.keyword} 맛집`)
+            setKeyword({keyword: `${data.keyword} 맛집`})
         }
     };
 
-    return(
+    return (
         <React.Fragment>
             {children}
         </React.Fragment>
     )
 }
 
-export default  RNListener;
+export default RNListener;

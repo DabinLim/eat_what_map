@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styled from "styled-components";
 import {useEffect, useState} from "react";
-import {useRecoilValue} from "recoil";
+import {useRecoilState, useRecoilValue} from "recoil";
 import {mapAtoms} from "../recoil/atoms/mapAtoms";
 import { get } from 'lodash';
 import "./styles/map.css";
@@ -12,10 +12,10 @@ const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
     const [map, setCurrentMap] = useState();
+    const [ps, setPs] = useState();
     const [infoWindow, setInfoWindow] = useState();
 
     let markers = [];
-
 
     useEffect(() => {
         let container = document.getElementById('map');
@@ -25,26 +25,27 @@ const KaKaoMap = () => {
                 level: 1,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
+            setPs(new kakao.maps.services.Places())
             setInfoWindow(new kakao.maps.InfoWindow({zIndex: 1}))
         }
     }, [kakao])
 
     useEffect(() => {
+        if(ps) {
+            console.log(ps);
+            searchPlaces();
+        }
+    }, [ps, keywordFromRN])
 
-        let ps = new kakao.maps.services.Places()
-        searchPlaces(ps);
-
-    }, [keywordFromRN])
-
-    const searchPlaces = (ps) => {
-        let keyword = keywordFromRN;
-        console.log(keyword);
+    const searchPlaces = () => {
+        let keyword = get(keywordFromRN, 'keyword');
+        console.log(get(keywordFromRN, 'keyword'));
 
         // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
         ps.keywordSearch(keyword, placesSearchCB);
     }
 
-    const placesSearchCB = (data, status, pagination, infoWindow) => {
+    const placesSearchCB = (data, status, pagination) => {
         if (status === kakao.maps.services.Status.OK) {
 
             // 정상적으로 검색이 완료됐으면
@@ -242,7 +243,7 @@ const KaKaoMap = () => {
                     <div className="option">
                         <div>
                             <form onSubmit="searchPlaces(); return false;">
-                                키워드 : <input type="text" value={keywordFromRN} id="keyword" size="15"/>
+                                키워드 : <input type="text" value={get(keywordFromRN, 'keyword')} id="keyword" size="15"/>
                                 <button type="submit">검색하기</button>
                             </form>
                         </div>
