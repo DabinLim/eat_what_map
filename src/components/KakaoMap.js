@@ -37,7 +37,7 @@ const KaKaoMap = () => {
     }, [keywordFromRN])
 
     const searchPlaces = (ps) => {
-        let keyword = get(keywordFromRN, 'keyword');
+        let keyword = keywordFromRN;
         console.log(keyword);
 
         // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
@@ -242,7 +242,7 @@ const KaKaoMap = () => {
                     <div className="option">
                         <div>
                             <form onSubmit="searchPlaces(); return false;">
-                                키워드 : <input type="text" value={get(keywordFromRN, "keyword")} id="keyword" size="15"/>
+                                키워드 : <input type="text" value={keywordFromRN} id="keyword" size="15"/>
                                 <button type="submit">검색하기</button>
                             </form>
                         </div>
