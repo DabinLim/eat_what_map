@@ -12,7 +12,6 @@ const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
     const [map, setCurrentMap] = useState();
-    const [ps, setPs] = useState();
     const [infoWindow, setInfoWindow] = useState();
 
     let markers = [];
@@ -26,18 +25,18 @@ const KaKaoMap = () => {
                 level: 1,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
-            setPs(new kakao.maps.services.Places());
             setInfoWindow(new kakao.maps.InfoWindow({zIndex: 1}))
         }
     }, [kakao])
 
     useEffect(() => {
-        if (ps) {
-            searchPlaces();
-        }
-    }, [ps, keywordFromRN])
 
-    const searchPlaces = () => {
+        let ps = new kakao.maps.services.Places()
+        searchPlaces(ps);
+
+    }, [keywordFromRN])
+
+    const searchPlaces = (ps) => {
         let keyword = get(keywordFromRN, 'keyword');
         console.log(keyword);
 
