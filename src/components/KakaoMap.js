@@ -3,6 +3,7 @@ import styled from "styled-components";
 import {useEffect, useState} from "react";
 import {useRecoilValue} from "recoil";
 import {mapAtoms} from "../recoil/atoms/mapAtoms";
+import { get } from 'lodash';
 import "./styles/map.css";
 
 const {kakao} = window
@@ -22,7 +23,7 @@ const KaKaoMap = () => {
         if (kakao) {
             let options = {
                 center: new kakao.maps.LatLng(location.latitude, location.longitude),
-                level: 8,
+                level: 1,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
             setPs(new kakao.maps.services.Places());
@@ -37,7 +38,8 @@ const KaKaoMap = () => {
     }, [ps, keywordFromRN])
 
     const searchPlaces = () => {
-        let keyword = JSON.stringify(keywordFromRN);
+        let keyword = get(keywordFromRN, 'keyword');
+        console.log(keyword);
 
         // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
         ps.keywordSearch(keyword, placesSearchCB);
@@ -241,7 +243,7 @@ const KaKaoMap = () => {
                     <div className="option">
                         <div>
                             <form onSubmit="searchPlaces(); return false;">
-                                키워드 : <input type="text" value={keywordFromRN} id="keyword" size="15"/>
+                                키워드 : <input type="text" value={get(keywordFromRN, "keyword")} id="keyword" size="15"/>
                                 <button type="submit">검색하기</button>
                             </form>
                         </div>

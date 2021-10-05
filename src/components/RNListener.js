@@ -26,7 +26,8 @@ const RNListener = ({children}) => {
             setLocation(() => data);
         }
         if( type === "Keyword") {
-            setKeyword(() => `${data} 맛집`)
+            console.log(data.keyword);
+            setKeyword(() => `${data.keyword} 맛집`)
         }
     };
 
