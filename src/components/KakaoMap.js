@@ -35,6 +35,11 @@ const KaKaoMap = () => {
     }, [kakao])
 
     useEffect(() => {
+        console.log(location)
+        console.log(latitude)
+        console.log(longitude);
+        console.log(keywordFromRN)
+        console.log(keyword)
         if(keyword && latitude && longitude) {
             searchPlaces()
         }
