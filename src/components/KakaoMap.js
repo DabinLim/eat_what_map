@@ -27,12 +27,12 @@ const KaKaoMap = () => {
         let container = document.getElementById('map');
         if (kakao) {
             let options = {
-                center: new kakao.maps.LatLng(location.latitude, location.longitude),
+                center: new kakao.maps.LatLng(latitude, longitude),
                 level: 3,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
         }
-    }, [kakao, location])
+    }, [kakao])
 
     useEffect(() => {
         console.log(location)
@@ -40,10 +40,10 @@ const KaKaoMap = () => {
         console.log(longitude);
         console.log(keywordFromRN)
         console.log(keyword)
-        if(keyword && latitude && longitude, map) {
+        if(keyword) {
             searchPlaces()
         }
-    },[location, keywordFromRN])
+    },[keywordFromRN])
 
     const searchPlaces = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=10000`,
