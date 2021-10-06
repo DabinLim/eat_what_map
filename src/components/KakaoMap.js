@@ -32,7 +32,7 @@ const KaKaoMap = () => {
             }
             setCurrentMap(new kakao.maps.Map(container, options));
         }
-    }, [kakao])
+    }, [kakao, location])
 
     useEffect(() => {
         console.log(location)
@@ -40,7 +40,7 @@ const KaKaoMap = () => {
         console.log(longitude);
         console.log(keywordFromRN)
         console.log(keyword)
-        if(keyword && latitude && longitude) {
+        if(keyword && latitude && longitude, map) {
             searchPlaces()
         }
     },[location, keywordFromRN])
