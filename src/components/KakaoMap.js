@@ -3,8 +3,13 @@ import styled from "styled-components";
 import {useEffect, useState} from "react";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {mapAtoms} from "../recoil/atoms/mapAtoms";
-import { get } from 'lodash';
+import {get} from 'lodash';
 import "./styles/map.css";
+import axios from 'axios';
+
+axios.defaults.baseURL = 'https://dapi.kakao.com'
+axios.defaults.headers.common['Authorization'] = `KakaoAK ${process.env.REACT_APP_KAKAO_LOCAL_KEY}`;
+axios.defaults.headers.common['X-Requested-With'] = 'curl';
 
 const {kakao} = window
 
@@ -12,9 +17,10 @@ const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
     const [map, setCurrentMap] = useState();
-    const [ps, setPs] = useState();
-    const [infoWindow, setInfoWindow] = useState();
 
+    const keyword = get(keywordFromRN, 'keyword');
+    const latitude = get(location, 'latitude');
+    const longitude = get(location, 'longitude');
     let markers = [];
 
     useEffect(() => {
@@ -22,35 +28,35 @@ const KaKaoMap = () => {
         if (kakao) {
             let options = {
                 center: new kakao.maps.LatLng(location.latitude, location.longitude),
-                level: 1,
+                level: 3,
             }
             setCurrentMap(new kakao.maps.Map(container, options));
-            setPs(new kakao.maps.services.Places())
-            setInfoWindow(new kakao.maps.InfoWindow({zIndex: 1}))
         }
     }, [kakao])
 
     useEffect(() => {
-        if(ps) {
-            console.log(ps);
-            searchPlaces();
+        if(keyword && latitude && longitude) {
+            searchPlaces()
         }
-    }, [ps, keywordFromRN])
+    },[location, keywordFromRN])
 
     const searchPlaces = () => {
-        let keyword = get(keywordFromRN, 'keyword');
-        console.log(get(keywordFromRN, 'keyword'));
-
-        // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
-        ps.keywordSearch(keyword, placesSearchCB);
+        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=10000`,
+        ).then((res) => {
+            const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
+                return a.distance - b.distance;
+            });
+            console.log(sortByDistance)
+            placesSearchCB(res.data.documents, res.status)
+        }).catch(err => console.log(err))
     }
 
-    const placesSearchCB = (data, status, pagination) => {
-        if (status === kakao.maps.services.Status.OK) {
+    const placesSearchCB = (data, status) => {
+        if (status === 200) {
 
             // 정상적으로 검색이 완료됐으면
             // 검색 목록과 마커를 표출합니다
-            if(window.ReactNativeWebView){
+            if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(
                     JSON.stringify({
                         type: 'placeData',
@@ -59,9 +65,6 @@ const KaKaoMap = () => {
                 )
             }
             displayPlaces(data);
-
-            // 페이지 번호를 표출합니다
-            displayPagination(pagination);
 
         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
 
@@ -78,84 +81,23 @@ const KaKaoMap = () => {
 
     const displayPlaces = (places) => {
 
-        let listEl = document.getElementById('placesList'),
-            menuEl = document.getElementById('menu_wrap'),
-            fragment = document.createDocumentFragment(),
-            bounds = new kakao.maps.LatLngBounds(),
-            listStr = '';
-
-        // 검색 결과 목록에 추가된 항목들을 제거합니다
-        removeAllChildNods(listEl);
+        let bounds = new kakao.maps.LatLngBounds();
 
         // 지도에 표시되고 있는 마커를 제거합니다
         removeMarker();
-
         for (let i = 0; i < places.length; i++) {
 
             // 마커를 생성하고 지도에 표시합니다
-            let placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
-                marker = addMarker(placePosition, i),
-                itemEl = getListItem(i, places[i]); // 검색 결과 항목 Element를 생성합니다
+            let placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
+            let marker = addMarker(placePosition, i);
 
             // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
             // LatLngBounds 객체에 좌표를 추가합니다
             bounds.extend(placePosition);
-
-            // 마커와 검색결과 항목에 mouseover 했을때
-            // 해당 장소에 인포윈도우에 장소명을 표시합니다
-            // mouseout 했을 때는 인포윈도우를 닫습니다
-            (function (marker, title) {
-                kakao.maps.event.addListener(marker, 'mouseover', function () {
-                    displayInfowindow(marker, title);
-                });
-
-                kakao.maps.event.addListener(marker, 'mouseout', function () {
-                    infoWindow.close();
-                });
-
-                itemEl.onmouseover = function () {
-                    displayInfowindow(marker, title);
-                };
-
-                itemEl.onmouseout = function () {
-                    infoWindow.close();
-                };
-            })(marker, places[i].place_name);
-
-            fragment.appendChild(itemEl);
         }
-
-        // 검색결과 항목들을 검색결과 목록 Elemnet에 추가합니다
-        listEl.appendChild(fragment);
-        menuEl.scrollTop = 0;
 
         // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
         map.setBounds(bounds);
-    }
-
-
-// 검색결과 항목을 Element로 반환하는 함수입니다
-    const getListItem = (index, places) => {
-
-        let el = document.createElement('li'),
-            itemStr = '<span class="markerbg marker_' + (index + 1) + '"></span>' +
-                '<div class="info">' +
-                '   <h5>' + places.place_name + '</h5>';
-
-        if (places.road_address_name) {
-            itemStr += '    <span>' + places.road_address_name + '</span>' +
-                '   <span class="jibun gray">' + places.address_name + '</span>';
-        } else {
-            itemStr += '    <span>' + places.address_name + '</span>';
-        }
-
-        itemStr += '  <span class="tel">' + places.phone + '</span>' +
-            '</div>';
-
-        el.innerHTML = itemStr;
-        el.className = 'item';
-
-        return el;
     }
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
@@ -187,72 +129,8 @@ const KaKaoMap = () => {
         markers = [];
     }
 
-// 검색결과 목록 하단에 페이지번호를 표시는 함수입니다
-    function displayPagination(pagination) {
-        let paginationEl = document.getElementById('pagination'),
-            fragment = document.createDocumentFragment(),
-            i;
-
-        // 기존에 추가된 페이지번호를 삭제합니다
-        while (paginationEl.hasChildNodes()) {
-            paginationEl.removeChild(paginationEl.lastChild);
-        }
-
-        for (i = 1; i <= pagination.last; i++) {
-            let el = document.createElement('a');
-            el.href = "#";
-            el.innerHTML = i;
-
-            if (i === pagination.current) {
-                el.className = 'on';
-            } else {
-                el.onclick = (function (i) {
-                    return function () {
-                        pagination.gotoPage(i);
-                    }
-                })(i);
-            }
-
-            fragment.appendChild(el);
-        }
-        paginationEl.appendChild(fragment);
-    }
-
-// 검색결과 목록 또는 마커를 클릭했을 때 호출되는 함수입니다
-// 인포윈도우에 장소명을 표시합니다
-    const displayInfowindow = (marker, title) => {
-        let content = '<div style="padding:5px;z-index:1;">' + title + '</div>';
-
-        infoWindow.setContent(content);
-        infoWindow.open(map, marker);
-    }
-
-// 검색결과 목록의 자식 Element를 제거하는 함수입니다
-    function removeAllChildNods(el) {
-        while (el.hasChildNodes()) {
-            el.removeChild(el.lastChild);
-        }
-    }
-
     return (
         <Container id="map">
-            <div className="map_wrap">
-                <div id="map" style={{height: '100%', width: '100%', position: 'relative', overflow: 'hidden'}}></div>
-
-                <div id="menu_wrap" className="bg_white" style={{zIndex: 20}}>
-                    <div className="option">
-                        <div>
-                            <form onSubmit="searchPlaces(); return false;">
-                                키워드 : <input type="text" value={get(keywordFromRN, 'keyword')} id="keyword" size="15"/>
-                                <button type="submit">검색하기</button>
-                            </form>
-                        </div>
-                    </div>
-                    <hr/>
-                    <ul id="placesList"></ul>
-                    <div id="pagination"></div>
-                </div>
-            </div>
         </Container>
     )
 }
