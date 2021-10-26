@@ -43,16 +43,18 @@ const KaKaoMap = () => {
         if(keyword) {
             searchPlaces()
         }
-    },[keywordFromRN])
+    },[keywordFromRN, location])
 
     const searchPlaces = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=10000`,
         ).then((res) => {
-            const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
-                return a.distance - b.distance;
-            });
-            console.log(sortByDistance)
-            placesSearchCB(res.data.documents, res.status)
+            if (res.data.documents.length > 0) {
+                const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
+                    return a.distance - b.distance;
+                });
+                console.log(sortByDistance)
+                placesSearchCB(res.data.documents, res.status)
+            }
         }).catch(err => console.log(err))
     }
 
