@@ -54,6 +54,15 @@ const KaKaoMap = () => {
                 });
                 console.log(sortByDistance)
                 placesSearchCB(res.data.documents, res.status)
+            } else {
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(
+                        JSON.stringify({
+                            type: 'placeData',
+                            message: [],
+                        })
+                    )
+                }
             }
         }).catch(err => console.log(err))
     }
