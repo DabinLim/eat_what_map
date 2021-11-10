@@ -48,7 +48,7 @@ const KaKaoMap = () => {
                 kakao.maps.event.remove();
             }
         }
-    },[map])
+    },[map, activeOverlay])
 
     useEffect(() => {
         let container = document.getElementById('map');
