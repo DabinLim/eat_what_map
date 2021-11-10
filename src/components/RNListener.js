@@ -28,7 +28,11 @@ const RNListener = ({children}) => {
         }
         if (type === "Keyword") {
             console.log(data.keyword);
-            setKeyword({keyword: `${data.keyword} 맛집`})
+            if (data.keyword === '') {
+                setKeyword('맛집');
+            } else {
+                setKeyword({keyword: `${data.keyword} 맛집`})
+            }
         }
     };
 
