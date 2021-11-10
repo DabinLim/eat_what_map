@@ -142,7 +142,7 @@ const KaKaoMap = () => {
             content : iwContent,
         });
 
-        kakao.maps.event.addListener(marker, 'mouseover', () => {
+        kakao.maps.event.addListener(marker, 'click', () => {
             // 마커 위에 인포윈도우를 표시합니다
             if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(
