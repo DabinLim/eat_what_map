@@ -11,7 +11,7 @@ const locationState = atom({
 const keywordState = atom({
     key: 'keywordState',
     default: {
-        keyword: '맛집'
+        keyword: undefined,
     }
 })
 
