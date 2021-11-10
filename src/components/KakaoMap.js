@@ -44,11 +44,11 @@ const KaKaoMap = () => {
             }
             kakao.maps.event.addListener(map, 'click', clearOverlay);
 
-            return () => {
-                kakao.maps.event.remove();
-            }
+            // return () => {
+            //     kakao.maps.event.remove();
+            // }
         }
-    },[map, activeOverlay])
+    },[map])
 
     useEffect(() => {
         let container = document.getElementById('map');
