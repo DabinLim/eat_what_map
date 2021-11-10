@@ -19,8 +19,8 @@ const KaKaoMap = () => {
     const pageState = useRecoilState(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
 
-    const keyword = get(keywordFromRN, 'keyword');
-    // const keyword = '맛집';
+    // const keyword = get(keywordFromRN, 'keyword');
+    const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     const page = get(pageState, 'page');
@@ -142,18 +142,6 @@ const KaKaoMap = () => {
 
         // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
         map.setBounds(bounds);
-        const infoTitle = document.querySelectorAll('.info-title');
-        infoTitle.forEach(function(e) {
-            const w = e.offsetWidth + 10;
-            const ml = w/2;
-            e.parentElement.style.top = "82px";
-            e.parentElement.style.left = "50%";
-            e.parentElement.style.marginLeft = -ml+"px";
-            e.parentElement.style.width = w+"px";
-            e.parentElement.previousSibling.style.display = "none";
-            e.parentElement.parentElement.style.border = "0px";
-            e.parentElement.parentElement.style.background = "unset";
-        });
     }
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
