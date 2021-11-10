@@ -32,9 +32,7 @@ const KaKaoMap = () => {
     useEffect(() => {
         if (map) {
             const clearOverlay = () => {
-                if (activeOverlay) {
-                    activeOverlay.setMap(null);
-                };
+                activeOverlay && activeOverlay.setMap(null);
                 if (window.ReactNativeWebView) {
                     window.ReactNativeWebView.postMessage(
                         JSON.stringify({
