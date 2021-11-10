@@ -30,27 +30,6 @@ const KaKaoMap = () => {
           imageSize = new kakao.maps.Size(36, 37);  // 마커 이미지의 크기
 
     useEffect(() => {
-        if (map) {
-            const clearOverlay = () => {
-                activeOverlay && activeOverlay.setMap(null);
-                if (window.ReactNativeWebView) {
-                    window.ReactNativeWebView.postMessage(
-                        JSON.stringify({
-                            type: 'selectedPlace',
-                            message: null,
-                        })
-                    )
-                }
-            }
-            kakao.maps.event.addListener(map, 'click', clearOverlay);
-
-            // return () => {
-            //     kakao.maps.event.remove();
-            // }
-        }
-    },[map])
-
-    useEffect(() => {
         let container = document.getElementById('map');
         if (kakao) {
             let options = {
@@ -164,6 +143,17 @@ const KaKaoMap = () => {
             position: position,
             content: content
         });
+
+        kakao.maps.event.addListener(map, 'click', () => {
+            activeOverlay && activeOverlay.setMap(null);
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({
+                        type: 'selectedPlace',
+                        message: null,
+                    })
+                )
+            }});
 
         kakao.maps.event.addListener(marker, 'click', () => {
             // 마커 위에 인포윈도우를 표시합니다
