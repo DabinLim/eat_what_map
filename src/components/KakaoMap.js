@@ -19,8 +19,8 @@ const KaKaoMap = () => {
     const pageState = useRecoilState(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
 
-    // const keyword = get(keywordFromRN, 'keyword');
-    const keyword = '맛집';
+    const keyword = get(keywordFromRN, 'keyword');
+    // const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     const page = get(pageState, 'page');
@@ -48,7 +48,7 @@ const KaKaoMap = () => {
                 kakao.maps.event.remove();
             }
         }
-    },[map])
+    },[map, activeOverlay])
 
     useEffect(() => {
         let container = document.getElementById('map');
