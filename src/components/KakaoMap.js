@@ -18,10 +18,15 @@ const KaKaoMap = () => {
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
     const [map, setCurrentMap] = useState();
 
-    const keyword = get(keywordFromRN, 'keyword');
+    // const keyword = get(keywordFromRN, 'keyword');
+    const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     let markers = [];
+    let selectedMarker;
+    let selectedInfoWindow;
+    const defaultImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
+          imageSize = new kakao.maps.Size(36, 37);  // 마커 이미지의 크기
 
     useEffect(() => {
         let container = document.getElementById('map');
@@ -40,10 +45,10 @@ const KaKaoMap = () => {
         console.log(longitude);
         console.log(keywordFromRN)
         console.log(keyword)
-        if(keyword) {
+        if(keyword && map) {
             searchPlaces()
         }
-    },[keywordFromRN, location])
+    },[keywordFromRN, location, map])
 
     const searchPlaces = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=10000`,
@@ -105,7 +110,7 @@ const KaKaoMap = () => {
 
             // 마커를 생성하고 지도에 표시합니다
             let placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
-            let marker = addMarker(placePosition, i);
+            let marker = addMarker(placePosition, i, places[i]?.place_name);
 
             // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
             // LatLngBounds 객체에 좌표를 추가합니다
@@ -118,31 +123,63 @@ const KaKaoMap = () => {
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
     const addMarker = (position, idx, title) => {
-        let imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
-            imageSize = new kakao.maps.Size(36, 37),  // 마커 이미지의 크기
-            imgOptions = {
+        const imgOptions = {
                 spriteSize: new kakao.maps.Size(36, 691), // 스프라이트 이미지의 크기
                 spriteOrigin: new kakao.maps.Point(0, (idx * 46) + 10), // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
                 offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
             },
-            markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
+            markerImage = createMarkerImage(imageSize, defaultImageSrc, imgOptions),
             marker = new kakao.maps.Marker({
                 position: position, // 마커의 위치
-                image: markerImage
+                image: markerImage,
             });
 
         marker.setMap(map); // 지도 위에 마커를 표출합니다
+        const iwContent = `<div style="padding:5px; font-size: 14px; width: auto; ">${title}</div>`,
+            iwRemoveable = true;
+
+        const infowindow = new kakao.maps.InfoWindow({
+            content : iwContent,
+        });
+
+        kakao.maps.event.addListener(marker, 'mouseover', () => {
+            // 마커 위에 인포윈도우를 표시합니다
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({
+                        type: 'pressedPlace',
+                        message: idx,
+                    })
+                )
+            }
+            infowindow.open(map, marker);
+        });
+
+        kakao.maps.event.addListener(marker, 'mouseout', () => {
+            infowindow.close();
+        })
+
         markers.push(marker);  // 배열에 생성된 마커를 추가합니다
 
         return marker;
     }
 
-// 지도 위에 표시되고 있는 마커를 모두 제거합니다
-    function removeMarker() {
+    // 지도 위에 표시되고 있는 마커를 모두 제거합니다
+    const removeMarker = () => {
         for (let i = 0; i < markers.length; i++) {
             markers[i].setMap(null);
         }
         markers = [];
+    }
+
+    const createMarkerImage = (markerSize, imageSrc, imageOptions) => {
+        const markerImage = new kakao.maps.MarkerImage(
+            imageSrc, // 스프라이트 마커 이미지 URL
+            markerSize, // 마커의 크기
+            imageOptions,
+        );
+
+        return markerImage;
     }
 
     return (
