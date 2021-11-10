@@ -23,10 +23,22 @@ const KaKaoMap = () => {
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     let markers = [];
-    let selectedMarker;
-    let selectedInfoWindow;
+    let activeOverlay;
     const defaultImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
           imageSize = new kakao.maps.Size(36, 37);  // 마커 이미지의 크기
+
+    useEffect(() => {
+        if (map) {
+            const clearOverlay = () => {
+                activeOverlay && activeOverlay.setMap(null);
+            }
+            kakao.maps.event.addListener(map, 'click', clearOverlay);
+
+            return () => {
+                kakao.maps.event.remove();
+            }
+        }
+    },[map])
 
     useEffect(() => {
         let container = document.getElementById('map');
@@ -119,6 +131,18 @@ const KaKaoMap = () => {
 
         // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
         map.setBounds(bounds);
+        const infoTitle = document.querySelectorAll('.info-title');
+        infoTitle.forEach(function(e) {
+            const w = e.offsetWidth + 10;
+            const ml = w/2;
+            e.parentElement.style.top = "82px";
+            e.parentElement.style.left = "50%";
+            e.parentElement.style.marginLeft = -ml+"px";
+            e.parentElement.style.width = w+"px";
+            e.parentElement.previousSibling.style.display = "none";
+            e.parentElement.parentElement.style.border = "0px";
+            e.parentElement.parentElement.style.background = "unset";
+        });
     }
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
@@ -135,11 +159,13 @@ const KaKaoMap = () => {
             });
 
         marker.setMap(map); // 지도 위에 마커를 표출합니다
-        const iwContent = `<div style="padding:5px; font-size: 14px; width: auto; ">${title}</div>`,
-            iwRemoveable = true;
+        const iwContent = `<span class="info-title">${title}</span>`,
+              iwRemoveable = true;
+        const content = `<div class ="label"><span class="left"></span><span class="center">${title}</span><span class="right"></span></div>`;
 
-        const infowindow = new kakao.maps.InfoWindow({
-            content : iwContent,
+        const customOverlay = new kakao.maps.CustomOverlay({
+            position: position,
+            content: content
         });
 
         kakao.maps.event.addListener(marker, 'click', () => {
@@ -152,12 +178,11 @@ const KaKaoMap = () => {
                     })
                 )
             }
-            infowindow.open(map, marker);
-        });
+            activeOverlay && activeOverlay.setMap(null);
+            customOverlay.setMap(map);
+            activeOverlay = customOverlay;
 
-        kakao.maps.event.addListener(marker, 'mouseout', () => {
-            infowindow.close();
-        })
+        });
 
         markers.push(marker);  // 배열에 생성된 마커를 추가합니다
 
