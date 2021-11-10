@@ -32,7 +32,9 @@ const KaKaoMap = () => {
     useEffect(() => {
         if (map) {
             const clearOverlay = () => {
-                activeOverlay && activeOverlay.setMap(null);
+                if (activeOverlay) {
+                    activeOverlay.setMap(null);
+                };
                 if (window.ReactNativeWebView) {
                     window.ReactNativeWebView.postMessage(
                         JSON.stringify({
@@ -43,22 +45,12 @@ const KaKaoMap = () => {
                 }
             }
             kakao.maps.event.addListener(map, 'click', clearOverlay);
-            kakao.maps.event.addListener(map, 'click', () => {
-                if (window.ReactNativeWebView) {
-                    window.ReactNativeWebView.postMessage(
-                        JSON.stringify({
-                            type: 'selectedPlace',
-                            message: 'clicked!',
-                        })
-                    )
-                }
-            });
 
             return () => {
                 kakao.maps.event.remove();
             }
         }
-    },[map])
+    },[map, activeOverlay])
 
     useEffect(() => {
         let container = document.getElementById('map');
