@@ -11,11 +11,19 @@ const locationState = atom({
 const keywordState = atom({
     key: 'keywordState',
     default: {
-        keyword: undefined
+        keyword: '맛집'
+    }
+})
+
+const paginationState = atom({
+    key: 'paginationState',
+    default: {
+        page: 1,
     }
 })
 
 export const mapAtoms = {
     locationState,
-    keywordState
+    keywordState,
+    paginationState,
 }

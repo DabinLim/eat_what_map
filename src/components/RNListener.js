@@ -6,6 +6,7 @@ const RNListener = ({children}) => {
 
     const [location, setLocation] = useRecoilState(mapAtoms.locationState);
     const [keyword, setKeyword] = useRecoilState(mapAtoms.keywordState);
+    const [page, setPage] = useRecoilState(mapAtoms.paginationState);
     useEffect(() => {
         if (window.ReactNativeWebView) {
             // android

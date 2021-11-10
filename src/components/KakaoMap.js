@@ -18,8 +18,8 @@ const KaKaoMap = () => {
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
     const [map, setCurrentMap] = useState();
 
-    // const keyword = get(keywordFromRN, 'keyword');
-    const keyword = '맛집';
+    const keyword = get(keywordFromRN, 'keyword');
+    // const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     let markers = [];
