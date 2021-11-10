@@ -16,12 +16,14 @@ const {kakao} = window
 const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
+    const pageState = useRecoilState(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
 
     const keyword = get(keywordFromRN, 'keyword');
     // const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
+    const page = get(pageState, 'page');
     let markers = [];
     let activeOverlay;
     const defaultImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
@@ -71,7 +73,7 @@ const KaKaoMap = () => {
     },[keywordFromRN, location, map])
 
     const searchPlaces = () => {
-        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=10000`,
+        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
                 const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
@@ -80,6 +82,7 @@ const KaKaoMap = () => {
                 console.log(sortByDistance)
                 placesSearchCB(res.data.documents, res.status)
             } else {
+                removeMarker();
                 if (window.ReactNativeWebView) {
                     window.ReactNativeWebView.postMessage(
                         JSON.stringify({
