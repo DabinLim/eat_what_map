@@ -31,6 +31,14 @@ const KaKaoMap = () => {
         if (map) {
             const clearOverlay = () => {
                 activeOverlay && activeOverlay.setMap(null);
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(
+                        JSON.stringify({
+                            type: 'selectedPlace',
+                            message: null,
+                        })
+                    )
+                }
             }
             kakao.maps.event.addListener(map, 'click', clearOverlay);
 
@@ -159,8 +167,6 @@ const KaKaoMap = () => {
             });
 
         marker.setMap(map); // 지도 위에 마커를 표출합니다
-        const iwContent = `<span class="info-title">${title}</span>`,
-              iwRemoveable = true;
         const content = `<div class ="label"><span class="left"></span><span class="center">${title}</span><span class="right"></span></div>`;
 
         const customOverlay = new kakao.maps.CustomOverlay({
@@ -173,7 +179,7 @@ const KaKaoMap = () => {
             if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(
                     JSON.stringify({
-                        type: 'pressedPlace',
+                        type: 'selectedPlace',
                         message: idx,
                     })
                 )
