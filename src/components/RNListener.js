@@ -24,6 +24,7 @@ const RNListener = ({children}) => {
         console.log(JSON.parse(event.data));
         const {data, type} = JSON.parse(event.data);
         if (type === "Location") {
+            setPage({page: 1});
             setLocation(data);
         }
         if (type === "Keyword") {
@@ -33,6 +34,9 @@ const RNListener = ({children}) => {
             } else {
                 setKeyword({keyword: `${data.keyword} 맛집`});
             }
+        }
+        if (type === 'Page') {
+            setPage(data)
         }
     };
 

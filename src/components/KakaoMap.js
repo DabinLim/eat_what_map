@@ -19,8 +19,8 @@ const KaKaoMap = () => {
     const pageState = useRecoilState(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
 
-    const keyword = get(keywordFromRN, 'keyword');
-    // const keyword = '맛집';
+    // const keyword = get(keywordFromRN, 'keyword');
+    const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     const page = get(pageState, 'page');
@@ -67,13 +67,14 @@ const KaKaoMap = () => {
         console.log(longitude);
         console.log(keywordFromRN)
         console.log(keyword)
+        console.log(page);
         if(keyword && map) {
             searchPlaces()
         }
     },[keywordFromRN, location, map])
 
     const searchPlaces = () => {
-        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000`,
+        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&${page}`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
                 const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
