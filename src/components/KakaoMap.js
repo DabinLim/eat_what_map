@@ -78,12 +78,12 @@ const KaKaoMap = () => {
     },[keywordFromRN, location, map, page])
 
     const searchPlaces = () => {
-        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&${page}`,
+        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
                 const mergeList = [...placeData, ...res.data.documents];
                 setPlaceData(mergeList);
-                placesSearchCB(res.data.documents, res.status)
+                placesSearchCB(mergeList, res.status)
             } else {
                 removeMarker();
                 if (window.ReactNativeWebView) {
