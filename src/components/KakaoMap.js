@@ -71,7 +71,7 @@ const KaKaoMap = () => {
         if(keyword && map) {
             searchPlaces()
         }
-    },[keywordFromRN, location, map])
+    },[keywordFromRN, location, map, page])
 
     const searchPlaces = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&${page}`,
