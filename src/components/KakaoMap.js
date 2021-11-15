@@ -16,8 +16,9 @@ const {kakao} = window
 const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
-    const pageState = useRecoilState(mapAtoms.paginationState);
+    const pageState = useRecoilValue(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
+    const [placeData, setPlaceData] = useState();
 
     // const keyword = get(keywordFromRN, 'keyword');
     const keyword = '맛집';
@@ -68,6 +69,9 @@ const KaKaoMap = () => {
         console.log(keywordFromRN)
         console.log(keyword)
         console.log(page);
+        if (page === 1) {
+            setPlaceData([]);
+        }
         if(keyword && map) {
             searchPlaces()
         }
@@ -77,10 +81,8 @@ const KaKaoMap = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&${page}`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
-                const sortByDistance = res.data.documents.sort(function(a, b) { // 오름차순
-                    return a.distance - b.distance;
-                });
-                console.log(sortByDistance)
+                const mergeList = [...placeData, ...res.data.documents];
+                setPlaceData(mergeList);
                 placesSearchCB(res.data.documents, res.status)
             } else {
                 removeMarker();
