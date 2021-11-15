@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {useRecoilState} from "recoil";
 import {mapAtoms} from "../recoil/atoms/mapAtoms";
+import {get} from "lodash";
 
 const RNListener = ({children}) => {
 
@@ -24,7 +25,10 @@ const RNListener = ({children}) => {
         console.log(JSON.parse(event.data));
         const {data, type} = JSON.parse(event.data);
         if (type === "Location") {
-            setPage({page: 1});
+            const page = get(page, 'page');
+            if(page !== 1) {
+                setPage({page: 1});
+            }
             setLocation(data);
         }
         if (type === "Keyword") {
