@@ -83,7 +83,10 @@ const KaKaoMap = () => {
             if (res.data.documents.length > 0) {
                 const mergeList = [...placeData, ...res.data.documents];
                 setPlaceData(mergeList);
-                placesSearchCB(mergeList, res.status)
+                const sortByDistance = mergeList.sort(function(a, b) { // 오름차순
+                    return a.distance - b.distance;
+                });
+                placesSearchCB(sortByDistance, res.status)
             } else {
                 removeMarker();
                 if (window.ReactNativeWebView) {
