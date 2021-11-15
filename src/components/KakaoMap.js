@@ -78,15 +78,21 @@ const KaKaoMap = () => {
     },[keywordFromRN, location, map, page])
 
     const searchPlaces = () => {
-        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}`,
+        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
                 const mergeList = [...placeData, ...res.data.documents];
                 setPlaceData(mergeList);
-                const sortByDistance = mergeList.sort(function(a, b) { // 오름차순
-                    return a.distance - b.distance;
-                });
-                placesSearchCB(sortByDistance, res.status)
+                placesSearchCB(mergeList, res.status)
+                if (res.data.documents.length < 15) {
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(
+                            JSON.stringify({
+                                type: 'lastPage',
+                            })
+                        )
+                    }
+                }
             } else {
                 removeMarker();
                 if (window.ReactNativeWebView) {
