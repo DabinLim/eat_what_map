@@ -76,7 +76,7 @@ const KaKaoMap = () => {
         }
     },[keywordFromRN, location, map, page])
 
-    const searchPlaces = useCallback(() => {
+    const searchPlaces = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
@@ -104,7 +104,7 @@ const KaKaoMap = () => {
                 }
             }
         }).catch(err => console.log(err))
-    },[keyword, latitude, longitude, page]);
+    };
 
     const placesSearchCB = (data, status) => {
         if (status === 200) {
