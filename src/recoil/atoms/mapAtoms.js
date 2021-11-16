@@ -5,6 +5,7 @@ const locationState = atom({
     default: {
         latitude: 37.56080754022743,
         longitude: 126.92737579814681,
+        page: 1,
     }
 })
 

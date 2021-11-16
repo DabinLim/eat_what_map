@@ -1,6 +1,6 @@
 import * as React from 'react';
 import styled from "styled-components";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {mapAtoms} from "../recoil/atoms/mapAtoms";
 import {get} from 'lodash';
@@ -16,15 +16,14 @@ const {kakao} = window
 const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
-    const pageState = useRecoilValue(mapAtoms.paginationState);
     const [map, setCurrentMap] = useState();
     const [placeData, setPlaceData] = useState();
 
-    // const keyword = get(keywordFromRN, 'keyword');
-    const keyword = '맛집';
+    const keyword = get(keywordFromRN, 'keyword');
+    // const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
-    const page = get(pageState, 'page');
+    const page = get(location, 'page');
     let markers = [];
     let activeOverlay;
     const defaultImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
@@ -77,7 +76,7 @@ const KaKaoMap = () => {
         }
     },[keywordFromRN, location, map, page])
 
-    const searchPlaces = () => {
+    const searchPlaces = useCallback(() => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
@@ -105,7 +104,7 @@ const KaKaoMap = () => {
                 }
             }
         }).catch(err => console.log(err))
-    }
+    },[keyword, latitude, longitude, page]);
 
     const placesSearchCB = (data, status) => {
         if (status === 200) {

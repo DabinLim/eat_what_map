@@ -7,7 +7,6 @@ const RNListener = ({children}) => {
 
     const [location, setLocation] = useRecoilState(mapAtoms.locationState);
     const [keyword, setKeyword] = useRecoilState(mapAtoms.keywordState);
-    const [page, setPage] = useRecoilState(mapAtoms.paginationState);
     useEffect(() => {
         if (window.ReactNativeWebView) {
             // android
@@ -25,10 +24,6 @@ const RNListener = ({children}) => {
         console.log(JSON.parse(event.data));
         const {data, type} = JSON.parse(event.data);
         if (type === "Location") {
-            const page = get(page, 'page');
-            if(page !== 1) {
-                setPage({page: 1});
-            }
             setLocation(data);
         }
         if (type === "Keyword") {
@@ -38,9 +33,6 @@ const RNListener = ({children}) => {
             } else {
                 setKeyword({keyword: `${data.keyword} 맛집`});
             }
-        }
-        if (type === 'Page') {
-            setPage(data)
         }
     };
 
