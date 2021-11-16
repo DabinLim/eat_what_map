@@ -80,7 +80,12 @@ const KaKaoMap = () => {
         axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
-                const mergeList = [...placeData, ...res.data.documents];
+                let mergeList;
+                if (page === 1) {
+                    mergeList = [...res.data.documents];
+                } else {
+                    mergeList = [...placeData, ...res.data.documents];
+                }
                 setPlaceData(mergeList);
                 placesSearchCB(mergeList, res.status)
                 if (res.data.documents.length < 15) {
