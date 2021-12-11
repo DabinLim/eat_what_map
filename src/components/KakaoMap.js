@@ -6,6 +6,7 @@ import {mapAtoms} from "../recoil/atoms/mapAtoms";
 import {get} from 'lodash';
 import "./styles/map.css";
 import axios from 'axios';
+import Marker from '../ic_marker.png';
 
 axios.defaults.baseURL = 'https://dapi.kakao.com'
 axios.defaults.headers.common['Authorization'] = `KakaoAK ${process.env.REACT_APP_KAKAO_LOCAL_KEY}`;
@@ -19,16 +20,13 @@ const KaKaoMap = () => {
     const [map, setCurrentMap] = useState();
     const [placeData, setPlaceData] = useState();
 
-    const keyword = get(keywordFromRN, 'keyword');
-    // const keyword = '맛집';
+    // const keyword = get(keywordFromRN, 'keyword');
+    const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     const page = get(location, 'page');
     let markers = [];
     let activeOverlay;
-    const defaultImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
-          imageSize = new kakao.maps.Size(36, 37);  // 마커 이미지의 크기
-
     useEffect(() => {
         if (map) {
             const clearOverlay = () => {
@@ -162,12 +160,7 @@ const KaKaoMap = () => {
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
     const addMarker = (position, idx, title) => {
-        const imgOptions = {
-                spriteSize: new kakao.maps.Size(36, 691), // 스프라이트 이미지의 크기
-                spriteOrigin: new kakao.maps.Point(0, (idx * 46) + 10), // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
-                offset: new kakao.maps.Point(13, 37) // 마커 좌표에 일치시킬 이미지 내에서의 좌표
-            },
-            markerImage = createMarkerImage(imageSize, defaultImageSrc, imgOptions),
+            const markerImage = createMarkerImage(),
             marker = new kakao.maps.Marker({
                 position: position, // 마커의 위치
                 image: markerImage,
@@ -210,11 +203,15 @@ const KaKaoMap = () => {
         markers = [];
     }
 
-    const createMarkerImage = (markerSize, imageSrc, imageOptions) => {
+    const createMarkerImage = () => {
+        const markerWidth = 32;
+        const markerHeight = 32;
+        const size = new kakao.maps.Size(markerWidth, markerHeight);
+        const options = { offset: new kakao.maps.Point(0, 0) };
         const markerImage = new kakao.maps.MarkerImage(
-            imageSrc, // 스프라이트 마커 이미지 URL
-            markerSize, // 마커의 크기
-            imageOptions,
+            Marker, // 스프라이트 마커 이미지 URL
+            size, // 마커의 크기
+            options,
         );
 
         return markerImage;
