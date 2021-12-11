@@ -207,7 +207,7 @@ const KaKaoMap = () => {
         const markerWidth = 32;
         const markerHeight = 32;
         const size = new kakao.maps.Size(markerWidth, markerHeight);
-        const options = { offset: new kakao.maps.Point(0, 0) };
+        const options = { offset: new kakao.maps.Point(16, 16) };
         const markerImage = new kakao.maps.MarkerImage(
             Marker, // 스프라이트 마커 이미지 URL
             size, // 마커의 크기
