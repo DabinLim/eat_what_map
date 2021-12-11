@@ -7,6 +7,7 @@ const RNListener = ({children}) => {
 
     const [location, setLocation] = useRecoilState(mapAtoms.locationState);
     const [keyword, setKeyword] = useRecoilState(mapAtoms.keywordState);
+    const [overlayId, setOverlayId] = useRecoilState(mapAtoms.overlayState);
     useEffect(() => {
         if (window.ReactNativeWebView) {
             // android
@@ -33,6 +34,10 @@ const RNListener = ({children}) => {
             } else {
                 setKeyword({keyword: `${data.keyword} 맛집`});
             }
+        }
+        if (type === "CardClick") {
+            console.log(data);
+            setOverlayId(data.id);
         }
     };
 

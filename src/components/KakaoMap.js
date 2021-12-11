@@ -17,20 +17,28 @@ const {kakao} = window
 const KaKaoMap = () => {
     const location = useRecoilValue(mapAtoms.locationState);
     const keywordFromRN = useRecoilValue(mapAtoms.keywordState);
+    const [overlayId, setOverlayId] = useRecoilState(mapAtoms.overlayState);
     const [map, setCurrentMap] = useState();
     const [placeData, setPlaceData] = useState();
+    const [activeOverlay, setActiveOverlay] = useState(null);
+    const [markerInfos, setMarkerInfos] = useState([]);
+    let activeOverlayForMarker;
 
-    // const keyword = get(keywordFromRN, 'keyword');
-    const keyword = '맛집';
+    const keyword = get(keywordFromRN, 'keyword');
+    // const keyword = '맛집';
     const latitude = get(location, 'latitude');
     const longitude = get(location, 'longitude');
     const page = get(location, 'page');
     let markers = [];
-    let activeOverlay;
+    const markerInfoContainer = [];
+
     useEffect(() => {
         if (map) {
             const clearOverlay = () => {
-                activeOverlay && activeOverlay.setMap(null);
+                if (activeOverlay) {
+                    activeOverlay.setMap(null);
+                }
+                setOverlayId(null);
                 if (window.ReactNativeWebView) {
                     window.ReactNativeWebView.postMessage(
                         JSON.stringify({
@@ -41,9 +49,8 @@ const KaKaoMap = () => {
                 }
             }
             kakao.maps.event.addListener(map, 'click', clearOverlay);
-
             return () => {
-                kakao.maps.event.remove();
+                kakao.maps.event.removeListener(map, 'click', clearOverlay);
             }
         }
     },[map, activeOverlay])
@@ -58,6 +65,23 @@ const KaKaoMap = () => {
             setCurrentMap(new kakao.maps.Map(container, options));
         }
     }, [kakao])
+
+    useEffect(() => {
+        const marker = markerInfos.find((v) => v.id === overlayId);
+        console.log(marker);
+        if (marker) {
+            const content = `<div class ="label"><span class="left"></span><span class="center">${marker.title}</span><span class="right"></span></div>`;
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: marker.position,
+                content: content
+            });
+            if (activeOverlay) {
+                activeOverlay.setMap(null);
+            }
+            setActiveOverlay(() => customOverlay);
+            customOverlay.setMap(map);
+        }
+    },[overlayId, map, activeOverlay])
 
     useEffect(() => {
         console.log(location)
@@ -75,7 +99,16 @@ const KaKaoMap = () => {
     },[keywordFromRN, location, map, page])
 
     const searchPlaces = () => {
-        axios.get(`/v2/local/search/keyword.json?query=${keyword}&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
+        if (page === 3) {
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                    JSON.stringify({
+                        type: 'lastPage',
+                    })
+                )
+            }
+        }
+        axios.get(`/v2/local/search/category.json?query=${keyword}&category_group_code=FD6&y=${latitude}&x=${longitude}&radius=20000&page=${page}&sort=distance`,
         ).then((res) => {
             if (res.data.documents.length > 0) {
                 let mergeList;
@@ -143,11 +176,13 @@ const KaKaoMap = () => {
 
         // 지도에 표시되고 있는 마커를 제거합니다
         removeMarker();
+        console.log(places);
+        console.log(places.length);
         for (let i = 0; i < places.length; i++) {
 
             // 마커를 생성하고 지도에 표시합니다
             let placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
-            let marker = addMarker(placePosition, i, places[i]?.place_name);
+            let marker = addMarker(placePosition, i, places[i]?.place_name, places[i]?.id);
 
             // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
             // LatLngBounds 객체에 좌표를 추가합니다
@@ -159,7 +194,7 @@ const KaKaoMap = () => {
     }
 
 // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
-    const addMarker = (position, idx, title) => {
+    const addMarker = (position, idx, title, id) => {
             const markerImage = createMarkerImage(),
             marker = new kakao.maps.Marker({
                 position: position, // 마커의 위치
@@ -167,12 +202,6 @@ const KaKaoMap = () => {
             });
 
         marker.setMap(map); // 지도 위에 마커를 표출합니다
-        const content = `<div class ="label"><span class="left"></span><span class="center">${title}</span><span class="right"></span></div>`;
-
-        const customOverlay = new kakao.maps.CustomOverlay({
-            position: position,
-            content: content
-        });
 
         kakao.maps.event.addListener(marker, 'click', () => {
             // 마커 위에 인포윈도우를 표시합니다
@@ -180,15 +209,18 @@ const KaKaoMap = () => {
                 window.ReactNativeWebView.postMessage(
                     JSON.stringify({
                         type: 'selectedPlace',
-                        message: idx,
+                        message: id,
                     })
                 )
             }
-            activeOverlay && activeOverlay.setMap(null);
-            customOverlay.setMap(map);
-            activeOverlay = customOverlay;
-
         });
+        const markerInfo = {
+            title,
+            position,
+            id,
+        }
+        markerInfoContainer.push(markerInfo);
+        setMarkerInfos(markerInfoContainer);
 
         markers.push(marker);  // 배열에 생성된 마커를 추가합니다
 

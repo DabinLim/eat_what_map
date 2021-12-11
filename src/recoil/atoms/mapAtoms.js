@@ -23,8 +23,16 @@ const paginationState = atom({
     }
 })
 
+const overlayState = atom({
+    key: 'overlayState',
+    default: {
+        id: null,
+    }
+})
+
 export const mapAtoms = {
     locationState,
     keywordState,
     paginationState,
+    overlayState,
 }
